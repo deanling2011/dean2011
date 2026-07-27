@@ -1,4 +1,5 @@
 import re
+import shutil
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -10,7 +11,6 @@ import fitz  # PyMuPDF
 # =====================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 PDF_PATH = BASE_DIR / "山图集.pdf"
 
@@ -36,16 +36,13 @@ print("=====================")
 
 # =====================
 # 日期匹配
-#
 # 支持:
 # 7月24日
 # 7 月24 日
 # 7  月  24  日
-#
 # =====================
 
 pattern = rf"{month}\s*月\s*{day}\s*日"
-
 
 date_regex = re.compile(pattern)
 
@@ -53,9 +50,28 @@ date_regex = re.compile(pattern)
 print("匹配规则:", pattern)
 
 
+
 # =====================
-# 创建输出目录
+# 检查PDF
 # =====================
+
+if not PDF_PATH.exists():
+
+    raise FileNotFoundError(
+        f"找不到PDF文件:{PDF_PATH}"
+    )
+
+
+# =====================
+# 清理旧结果
+# =====================
+
+if OUTPUT_DIR.exists():
+
+    shutil.rmtree(
+        OUTPUT_DIR
+    )
+
 
 OUTPUT_DIR.mkdir(
     exist_ok=True
@@ -68,16 +84,10 @@ print(
 )
 
 
+
 # =====================
 # 打开PDF
 # =====================
-
-if not PDF_PATH.exists():
-
-    raise FileNotFoundError(
-        f"找不到PDF文件:{PDF_PATH}"
-    )
-
 
 doc = fitz.open(
     PDF_PATH
@@ -89,8 +99,9 @@ found = False
 result_images = []
 
 
+
 # =====================
-# 搜索PDF
+# 搜索PDF页面
 # =====================
 
 for page_index, page in enumerate(doc):
@@ -99,7 +110,6 @@ for page_index, page in enumerate(doc):
     text = page.get_text()
 
 
-    # 去除所有空格
     clean_text = re.sub(
         r"\s+",
         "",
@@ -119,10 +129,6 @@ for page_index, page in enumerate(doc):
             page_index + 1
         )
 
-
-        # =====================
-        # PDF页面转图片
-        # =====================
 
         pix = page.get_pixmap(
             dpi=200
@@ -148,18 +154,52 @@ for page_index, page in enumerate(doc):
         )
 
 
-        print(
-            "生成:",
-            image_path
-        )
-
-
         found = True
+
+
+        print(
+            "生成图片:",
+            image_name
+        )
 
 
 
 # =====================
-# 生成HTML首页
+# 没找到
+# =====================
+
+if not found:
+
+
+    print("=====================")
+
+    print(
+        "今天没有找到对应日期:",
+        f"{month}月{day}日"
+    )
+
+    print(
+        "不生成结果，不上传Artifact"
+    )
+
+    print("=====================")
+
+
+    # 删除空目录
+
+    if OUTPUT_DIR.exists():
+
+        shutil.rmtree(
+            OUTPUT_DIR
+        )
+
+
+    exit(0)
+
+
+
+# =====================
+# 找到后生成HTML
 # =====================
 
 
@@ -172,24 +212,32 @@ html = f"""
 
 <meta charset="utf-8">
 
-<title>山图集 {month}月{day}日</title>
+<title>
+山图集 {month}月{day}日
+</title>
 
 
 <style>
 
 body {{
+
     font-family:
     Arial,
     "Microsoft YaHei";
 
     padding:20px;
+
 }}
 
 
 img {{
+
     max-width:95%;
+
     margin-bottom:30px;
+
     border:1px solid #ddd;
+
 }}
 
 </style>
@@ -205,35 +253,24 @@ img {{
 山图集 {month}月{day}日
 </h1>
 
-
 """
 
 
-if found:
+for img in result_images:
 
 
-    for img in result_images:
+    html += f"""
 
-        html += f"""
+<h2>
+{img}
+</h2>
 
-<h2>{img}</h2>
 
 <img src="{img}">
 
 
 """
 
-
-else:
-
-
-    html += """
-
-<h2>
-今天没有找到对应日期
-</h2>
-
-"""
 
 
 html += """
@@ -243,6 +280,7 @@ html += """
 </html>
 
 """
+
 
 
 index_file = OUTPUT_DIR / "index.html"
@@ -256,29 +294,25 @@ index_file.write_text(
 
 
 # =====================
-# 输出结果
+# 完成
 # =====================
 
 print("=====================")
 
-if found:
+print(
+    "处理完成"
+)
 
-    print(
-        "处理完成",
-        result_images
-    )
-
-else:
-
-    print(
-        "未找到:",
-        f"{month}月{day}日"
-    )
+print(
+    "生成图片:",
+    result_images
+)
 
 
 print(
     "生成网页:",
     index_file
 )
+
 
 print("=====================")
