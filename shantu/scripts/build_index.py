@@ -10,9 +10,9 @@ import fitz   # PyMuPDF
 # 配置
 # =====================
 
-PDF_PATH = "../山图集.pdf"
+PDF_PATH = "shantu/山图集.pdf"
 
-OUTPUT_DIR = "../result"
+OUTPUT_DIR = "shantu/result"
 
 
 # =====================
