@@ -2,30 +2,27 @@ name: Shantu PDF Test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
-
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-
-      - name: Install dependencies
+      - name: Install requirements
         run: |
-          pip install -r requirements.txt
+          pip install -r shantu/requirements.txt
 
-
-      - name: Run shantu script
-        working-directory: scripts
+      - name: Run PDF parser
         run: |
-          python build_index.py
+          python shantu/scripts/build_index.py
