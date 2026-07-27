@@ -1,23 +1,31 @@
-steps:
+name: Shantu PDF Test
 
-- name: Checkout
-  uses: actions/checkout@v4
+on:
+  workflow_dispatch:
 
-- name: Setup Python
-  uses: actions/setup-python@v5
-  with:
-    python-version: "3.11"
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-- name: Install requirements
-  run: |
-    pip install -r shantu/requirements.txt
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-- name: Run PDF parser
-  run: |
-    python shantu/scripts/build_index.py
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-- name: Upload result
-  uses: actions/upload-artifact@v4
-  with:
-    name: shantu-result
-    path: shantu/result
+      - name: Install requirements
+        run: |
+          pip install -r shantu/requirements.txt
+
+      - name: Run PDF parser
+        run: |
+          python shantu/scripts/build_index.py
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: shantu-result
+          path: shantu/result
