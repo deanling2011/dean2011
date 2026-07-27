@@ -27,7 +27,7 @@ def get_beijing_time():
         timedelta(hours=8)
     )
 
-return datetime.now(beijing)
+    return datetime.now(beijing)
 
 
 
