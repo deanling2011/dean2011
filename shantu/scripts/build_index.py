@@ -23,7 +23,12 @@ OUTPUT_DIR = BASE_DIR / "result"
 
 beijing = timezone(timedelta(hours=8))
 
-today = datetime.now(beijing)
+today = datetime(
+    2026,
+    7,
+    24,
+    tzinfo=beijing
+)
 
 month = today.month
 day = today.day
